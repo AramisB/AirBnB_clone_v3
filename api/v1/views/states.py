@@ -7,32 +7,35 @@ from flask import abort, request, jsonify
 from models.state import State
 
 
-@app_views.route('/states/', methods=['GET', 'OPTIONS'])
+@app_views.route('/states/', methods=['GET', 'OPTIONS'],
+                 strict_slashes=False)
 def getStates():
     """A function to get states"""
-    states = storage.all('State')
+    states = storage.all(State)
     all_states = []
     for state in states.values():
         all_states.append(state.to_dict())
     return jsonify(all_states)
 
 
-@app_views.route('/states/<state_id>', methods=['GET', 'OPTIONS'])
+@app_views.route('/states/<state_id>',
+                 methods=['GET', 'OPTIONS'], strict_slashes=False)
 def getStateById(state_id):
     """A method to get state by id
     """
-    state = storage.get('State', state_id)
+    state = storage.get(State, state_id)
     if not state:
         abort(404)
     else:
         return jsonify(state.to_dict())
 
 
-@app_views.route('/states/<state_id>', methods=['DELETE', 'OPTIONS'])
+@app_views.route('/states/<state_id>', methods=['DELETE', 'OPTIONS'],
+                 strict_slashes=False)
 def deleteStateById(state_id):
     """A method to delete state by id
     """
-    state = storage.get('State', state_id)
+    state = storage.get(State, state_id)
     if not state:
         abort(404)
     else:
@@ -41,7 +44,8 @@ def deleteStateById(state_id):
         return {}, 200
 
 
-@app_views.route('/states/', methods=['POST', 'OPTIONS'])
+@app_views.route('/states/', methods=['POST', 'OPTIONS'],
+                 strict_slashes=False)
 def createState():
     """A method to delete state by id
     """
@@ -55,15 +59,14 @@ def createState():
     return jsonify(state_obj.to_dict())
 
 
-@app_views.route('/states/<state_id>', methods=['PUT', 'OPTIONS'])
+@app_views.route('/states/<state_id>', methods=['PUT', 'OPTIONS'],
+                 strict_slashes=False)
 def editState(state_id):
     """A method to edit state by id
     """
-    state = storage.get('State', state_id)
-    print(state_id)
-    print(state)
+    state = storage.get(State, state_id)
     if not state:
-        print("Issue")
+        abort(404)
     else:
         try:
             request_json = request.get_json()
