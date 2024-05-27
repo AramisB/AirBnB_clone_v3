@@ -29,7 +29,6 @@ def getStateById(state_id):
     else:
         return jsonify(state.to_dict())
 
-
 @app_views.route('/states/<state_id>', methods=['DELETE', 'OPTIONS'],
                  strict_slashes=False)
 def deleteStateById(state_id):
@@ -38,10 +37,10 @@ def deleteStateById(state_id):
     state = storage.get(State, state_id)
     if not state:
         abort(404)
-    else:
-        storage.delete(state)
-        storage.save()
-        return {}, 200
+
+    storage.delete(state)
+    storage.save()
+    return jsonify({}), 200
 
 
 @app_views.route('/states/', methods=['POST', 'OPTIONS'],
