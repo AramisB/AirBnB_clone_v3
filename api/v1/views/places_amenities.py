@@ -13,7 +13,7 @@ from models.amenity import Amenity
 def get_place_amenities(place_id):
     """Retrieves the list of all Amenity objects of a Place"""
     place = storage.get(Place, place_id)
-    if place_id not in place:
+    if not place:
         abort(404)
 
     amenities = [amenity.to_dict() for amenity in place.amenities]
