@@ -7,7 +7,7 @@ from flask import abort, request, jsonify
 from models.state import State
 
 
-@app_views.route('/states/', methods=['GET', 'OPTIONS'],
+@app_views.route('/states/', methods=['GET'],
                  strict_slashes=False)
 def getStates():
     """A function to get states"""
@@ -18,17 +18,16 @@ def getStates():
     return jsonify(all_states)
 
 @app_views.route('/states/<state_id>',
-                 methods=['GET', 'OPTIONS'], strict_slashes=False)
+                 methods=['GET'], strict_slashes=False)
 def getStateById(state_id):
     """A method to get state by id
     """
     state = storage.get(State, state_id)
     if not state:
         abort(404)
-    else:
-        return jsonify(state.to_dict())
+    return jsonify(state.to_dict())
 
-@app_views.route('/states/<state_id>', methods=['DELETE', 'OPTIONS'],
+@app_views.route('/states/<state_id>', methods=['DELETE'],
                  strict_slashes=False)
 def deleteStateById(state_id):
     """A method to delete state by id
