@@ -7,7 +7,7 @@ from flask import abort, request, jsonify
 from models.state import State
 
 
-@app_views.route('/states/', methods=['GET', 'OPTIONS'],
+@app_views.route('/states/', methods=['GET'],
                  strict_slashes=False)
 def getStates():
     """A function to get states"""
@@ -17,19 +17,17 @@ def getStates():
         all_states.append(state.to_dict())
     return jsonify(all_states)
 
-
 @app_views.route('/states/<state_id>',
-                 methods=['GET', 'OPTIONS'], strict_slashes=False)
+                 methods=['GET'], strict_slashes=False)
 def getStateById(state_id):
     """A method to get state by id
     """
     state = storage.get(State, state_id)
     if not state:
         abort(404)
-    else:
-        return jsonify(state.to_dict())
+    return jsonify(state.to_dict())
 
-@app_views.route('/states/<state_id>', methods=['DELETE', 'OPTIONS'],
+@app_views.route('/states/<state_id>', methods=['DELETE'],
                  strict_slashes=False)
 def deleteStateById(state_id):
     """A method to delete state by id
@@ -42,36 +40,39 @@ def deleteStateById(state_id):
     storage.save()
     return jsonify({}), 200
 
-
-@app_views.route('/states/', methods=['POST', 'OPTIONS'],
+@app_views.route('/states/', methods=['POST'],
                  strict_slashes=False)
 def createState():
-    """A method to delete state by id
+    """A method to create state by id
     """
-    try:
-        new_state = request.get_json()
-        state_obj = State(**new_state)
-        storage.new(state_obj)
-        storage.save()
-    except Exception as e:
-        abort(400, 'Not a JSON')
-    return jsonify(state_obj.to_dict())
+    if not request.is_json:
+        abort(400, "Not a JSON")
 
+    data = request.get_json()
+    if "name" not in data:
+        abort(400, "Missing name")
 
-@app_views.route('/states/<state_id>', methods=['PUT', 'OPTIONS'],
+    state = State(**data)
+    storage.save()
+    return jsonify(state.to_dict()), 201
+
+@app_views.route('/states/<state_id>', methods=['PUT'],
                  strict_slashes=False)
 def editState(state_id):
     """A method to edit state by id
     """
+    if not request.is_json:
+        abort(400, 'Not a JSON')
+
+    data = request.get_json()
     state = storage.get(State, state_id)
     if not state:
         abort(404)
-    else:
-        try:
-            request_json = request.get_json()
-            for key, value in request_json.items():
-                setattr(state, key, value)
-        except Exception as e:
-            abort(404, 'Not a valid JSON')
-        state.save()
-        return jsonify(state.to_dict()), 200
+
+    ignore_keys = ['id', 'created_at', 'updated_at']
+    for key, value in data.items():
+        if key not in ignore_keys:
+            setattr(state, key, value)
+
+    storage.save()
+    return jsonify(state.to_dict()), 200
